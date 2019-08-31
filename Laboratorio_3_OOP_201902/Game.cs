@@ -14,12 +14,16 @@ namespace Laboratorio_3_OOP_201902
         private List<Deck> decks;
         private Board boardGame;
         private bool endGame;
+        private List<Deck> cards;
+        private int numberOfDeck;
 
         //Constructor
         public Game()
         {
+            decks = new List<Deck>();
+            cards = new List<Deck>();
 
-        }
+        } 
 
         //Propiedades
         public Player[] Players
@@ -93,40 +97,51 @@ namespace Laboratorio_3_OOP_201902
         {
             throw new NotImplementedException();
         }
-        public void read()
+        public void Read()
         {
             string s = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../Files/Decks.txt");
             StreamReader reader = new StreamReader(s);
-            
+
+            string start = reader.ReadLine();
+            numberOfDeck = 0;
             while (!reader.EndOfStream)
             {
-                string line = reader.ReadLine();
-                if (line != "START")
+                if (start == "START")
                 {
-                    Console.WriteLine($"Wrong action {line}, please enter START to start a deck");
-                    break;
+                    
+                    string line = reader.ReadLine();
+                    while (!reader.EndOfStream)
+                    {
+                        if (line == "END")
+                        {
+                            decks[numberOfDeck].Cards = new List<Card>(cards);
+                            numberOfDeck += 1;
+                            break;
+                        }
+                        string[] cardParams = line.Split(',');
+                        switch (cardParams[0])
+                        {
+                            case "CombatCard":
+                                cards.Add(new CombatCard( cardParams[1],
+                                    ((Enums.EnumType)Enum.Parse(typeof(Enums.EnumType), cardParams[2]))).ToString(),
+                                    cardParams[3].ToString(), Convert.ToInt32(cardParams[4]), Boolean.Parse(cardParams[5]));
+                                break;                              //NO SE PORQUE AMBOS ME DICEN QUE EL PARAMETRO QUE METO EN EFFECT
+                                                                    //NO ES DEL TIPO NECESARIO SIENDO QUE EFFECT ES STRING.
+                            case "SpecialCard":
+                                cards.Add(new SpecialCard(cardParams[1],
+                                    (Enums.EnumType)Enum.Parse(typeof(Enums.EnumType),
+                                    cardParams[2])), cardParams[3]);
+                                break;
+                        }
+
+                    }
 
                 }
-                while (!reader.EndOfStream)
+                else
                 {
-                    if (line == "END")
-                    {
-                        break;
-                    }
-                    string[] cardParams = line.Split(',');
-                    switch (cardParams[0])
-                    {
-                        case "CombatCard":
-
-                            break;
-                        case "SpecialCard":
-
-                            break;
-                    }
-
+                    throw new IndexOutOfRangeException($"Wrong action {start}, please enter START to start a deck");
                 }
             }
-            
             reader.Close();
 
         }
